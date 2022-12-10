@@ -1,0 +1,466 @@
+<!DOCTYPE HTML>
+<html lang="en">
+	<head>
+		<title>Example</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+		<meta name="description" content="Example" />
+		<meta property="og:site_name" content="Example" />
+		<meta property="og:title" content="Example" />
+		<meta property="og:type" content="website" />
+		<meta property="og:description" content="Example" />
+		<link href="https://fonts.googleapis.com/css?display=swap&family=Inter:400,400italic,600,600italic,300,300italic" rel="stylesheet" type="text/css" />
+		<link rel="stylesheet" href="assets/main.css" />
+		<noscript><link rel="stylesheet" href="assets/noscript.css" /></noscript>
+		<style>
+		
+		.testimonials {
+		display: flex;
+		align-content: center;
+		justify-content: center;
+		flex-wrap: nowrap;
+		}
+		
+		.testimonials .wrapper {
+		max-width: 45rem;
+		width: auto !important;
+		}
+		
+		.testimonial {
+		width: 50%;
+		height: 0;
+		width: 0;
+		margin: 0;
+		visibility: hidden;
+		opacity: 0;
+		position: relative;
+		}
+		
+		.testimonial.active,
+		.testimonial.next,
+		.testimonial.prev {
+		height: auto;
+		max-height: 100%;
+		visibility: visible;
+		transition: .2s;
+		width: auto;
+		}
+		
+		.testimonial.active {
+		opacity: 1;
+		transform: scale(1) translateY(0) translateX(0);
+		}
+		
+		.testimonial.prev,
+		.testimonial.next {
+		cursor: pointer;
+		opacity: 0.5;
+		transform: scale(0.93) translateY(0rem) translateX(0);
+		}
+		
+		.testimonial.prev:before,
+		.testimonial.next:before {
+		content: '';
+		cursor: pointer;
+		border-color: #708296;
+		border-style: solid;
+		border-width: 0.25rem 0.25rem 0 0;
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		margin: auto;
+		width: 2rem;
+		height: 2rem;
+		transform: rotate(-45deg);
+		
+		}
+		
+		.testimonial.prev:before {
+		transform: rotate(-135deg);
+		left: 1rem;
+		
+		}
+		
+		.testimonial.next:before {
+		transform: rotate(45deg);
+		right: 1rem;
+		
+		}
+		
+		.testimonial.prev:hover:before {
+		border-color: #1799e4;
+		
+		}
+		
+		.testimonial.next:hover:before {
+		border-color: #1799e4;
+		
+		}
+		
+		@media (max-width: 980px) {
+		
+		.testimonial.prev,
+		.testimonial.next {
+		width: 4rem;
+		height: auto;
+		}
+		
+		.testimonial.prev .wrapper,
+		.testimonial.next .wrapper {
+		display: none !important;
+		}
+		
+		.testimonial.active .wrapper {
+		display: inline-block !important;
+		}
+		
+		@media (max-width: 736px) {
+
+		}
+		
+		</style>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+		
+		<script>
+		
+		window.onload = function() {
+
+			jQuery.event.special.touchstart = {
+				setup: function( _, ns, handle ) {
+					this.addEventListener("touchstart", handle, { passive: !ns.includes("noPreventDefault") });
+				}
+			};
+			jQuery.event.special.touchmove = {
+				setup: function( _, ns, handle ) {
+					this.addEventListener("touchmove", handle, { passive: !ns.includes("noPreventDefault") });
+				}
+			};
+			jQuery.event.special.wheel = {
+				setup: function( _, ns, handle ){
+					this.addEventListener("wheel", handle, { passive: true });
+				}
+			};
+			jQuery.event.special.mousewheel = {
+				setup: function( _, ns, handle ){
+					this.addEventListener("mousewheel", handle, { passive: true });
+				}
+			};
+		
+			$testimonial = $('#embed04');
+			$testimonialItem = $testimonial.find('.container');
+
+			const test = document.querySelectorAll('#embed04 .container')
+			
+			$testimonial.addClass('testimonials');
+			$testimonialItem.addClass('testimonial');
+			
+			$num = $testimonialItem.length;
+			$even = $num / 4;
+			
+			$odd = ($num + 1) / 2;
+
+			/* New variables */
+			$currentSlide = 1;
+			$lastSlide = $testimonialItem.length - 1;
+			$lastSlideIndex = $lastSlide;
+			$firstSlide = 0;
+			$firstSlideIndex = $firstSlide;
+			
+			if ($num % 2 == 0) {
+				$testimonial.find('.testimonial:nth-child(' + $even + ')').addClass('active');
+				$testimonial.find('.testimonial:nth-child(' + $even + ')').prev().addClass('prev');
+				$testimonial.find('.testimonial:nth-child(' + $even + ')').next().addClass('next');
+			} else {
+				$testimonial.find('.testimonial:nth-child(' + $odd + ')').addClass('active');
+				$testimonial.find('.testimonial:nth-child(' + $odd + ')').prev().addClass('prev');
+				$testimonial.find('.testimonial:nth-child(' + $odd + ')').next().addClass('next');
+			}
+			
+			$testimonialItem.click(function() {
+				$slide = $testimonial.find('.active').width();
+				
+				if ($(this).hasClass('next')) {
+					$currentSlide++;
+					if ($currentSlide === $lastSlide) loadNewSlides();  /* New Code. If last slide, move first slide to new last. */
+					$testimonial.stop(false, true).animate({left: '-=' + $slide}, 1000, "swing");
+				} else if ($(this).hasClass('prev')) {
+					$currentSlide--;
+					if ($currentSlide === 0) loadNewSlides(); /* New Code. If first slide, move last slide to new first. */
+					$testimonial.stop(false, true).animate({left: '+=' + $slide}, 1000, "swing");
+				}
+				
+				$(this).removeClass('prev next');
+				$(this).siblings().removeClass('prev active next');
+				
+				$(this).addClass('active');
+				$(this).prev().addClass('prev');
+				$(this).next().addClass('next');
+			});
+			
+			/* Keyboard nav */
+			$('html body').keydown(function(e) {
+				if (e.keyCode == 37) { /* left */
+					$testimonial.find('.active').prev().trigger('click');
+				}
+				else if (e.keyCode == 39) { /* right */
+					$testimonial.find('.active').next().trigger('click');
+				}
+			});
+
+			/* NEW CODE */
+
+			/* PASSIVE SUPPORT TEST */
+			let passiveSupported = false;
+
+			try {
+				const options = {
+					get passive() { // This function will be called when the browser
+									//   attempts to access the passive property.
+					passiveSupported = true;
+					return false;
+					}
+				};
+
+				window.addEventListener("test", null, options);
+				window.removeEventListener("test", null, options);
+			} catch (err) {
+				passiveSupported = false;
+			}
+
+			/* Infinite scrolling slides */
+
+			function loadNewSlides() {
+				if ($currentSlide === $lastSlide) {
+					console.log($testimonialItem[0]);
+					$testimonialItem[$lastSlideIndex].insertAdjacentElement("afterend", $testimonialItem[$firstSlideIndex]);
+
+					$lastSlideIndex++;
+					if($lastSlideIndex > $lastSlide) {
+						$lastSlideIndex = $firstSlide
+					}
+
+					$firstSlideIndex++;
+					if($firstSlideIndex > $lastSlide) {
+						$firstSlideIndex = $firstSlide
+					}
+
+					$currentSlide--;
+				}
+				if ($currentSlide === $firstSlide) {
+					console.log($testimonialItem[$lastSlide])
+					$testimonialItem[$firstSlideIndex].insertAdjacentElement("beforebegin", $testimonialItem[$lastSlideIndex]);
+
+					$lastSlideIndex--;
+					if($lastSlideIndex < $firstSlide) {
+						$lastSlideIndex = $lastSlide
+					}
+					
+					$firstSlideIndex--;
+					if($firstSlideIndex < $firstSlide) {
+						$firstSlideIndex = $lastSlide
+					}
+
+					$currentSlide++;
+				}
+			}
+
+			/*Swipe Control*/
+			$testimonialItem.bind('touchstart', handleTouchStart);     
+			$testimonialItem.bind('touchmove', handleTouchMove);
+
+			function getTouches(evt) {
+				return evt.touches;
+			}
+
+			function handleTouchStart(evt) {
+				const firstTouch = getTouches(evt)[0];
+				xDown = firstTouch.clientX;
+				yDown = firstTouch.clientY;
+			}                      
+
+			function handleTouchMove(evt) {
+				if ( ! xDown || ! yDown ) {
+					return;
+				}
+
+				var xUp = evt.touches[0].clientX;
+				var yUp = evt.touches[0].clientY;
+
+				var xDiff = xDown - xUp;
+				var yDiff = yDown - yUp;
+
+				if ( Math.abs( xDiff ) > Math.abs( yDiff ) ) {/*most significant*/
+					if ( xDiff > 0 ) {
+						/* left swipe */ 
+						$testimonial.find('.active').next().trigger('click');
+					} else {
+						/* right swipe */
+						$testimonial.find('.active').prev().trigger('click');
+					}
+				}
+				/* reset values */
+				xDown = null;
+				yDown = null;
+			}
+
+			/* Carousel auto next */
+
+			var activeImage = 0;
+
+			function nextCarouselImage() {
+				$testimonial.find('.active').next().trigger('click');
+				// Re-call the function after 5s
+				setTimeout(nextCarouselImage, 5000);
+			}
+
+			setTimeout(nextCarouselImage, 5000);
+		}
+
+		</script>
+	</head>
+	<body class="is-loading">
+		<div id="wrapper">
+			<div id="main">
+				<div class="inner">
+					<div id="container29" class="container columns full screen">
+						<div class="wrapper">
+							<div class="inner">
+								<span></span>
+								<div>
+									<ul id="buttons06" class="style2 buttons">
+										<li>
+											<a href="#devs" class="button n01"><svg><use xlink:href="assets/icons.svg#email-alt"></use></svg><span class="label">Let&#039;s chat</span></a>
+										</li>
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div id="container38" class="container default full screen">
+						<div class="wrapper">
+							<div class="inner">
+								<h2 id="text97" class="style1">Ullamcorper morbi tincidunt ornare eget purus.</h2>
+								<p id="text108" class="style2">A condimentum vitae sapien pellentesque habitant. Proin nunc consequat interdum varius alis propriis volat mattis.</p>
+								<ul id="buttons16" class="style1 buttons">
+									<li>
+										<a href="#call" class="button n01"><svg><use xlink:href="assets/icons.svg#arrow-down-light"></use></svg><span class="label">Learn more</span></a>
+									</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+					<div id="embed04">
+						<div>
+					</div>
+					<div id="container14" class="style9 container columns">
+						<div class="wrapper">
+							<div class="inner">
+								<div>
+									<div id="image21" class="style6 image">
+										<span class="frame"><img src="assets/images/image21.jpg" alt="" /></span>
+									</div>
+								</div>
+								<div>
+									<p id="text11" class="style13">Name, CEO at <mark>Company</mark></p>
+									<p id="text14" class="style12">Risus letanie feugiat posuere urna tincidunt present. Interdum varius vincit omnia dum spiro melior laoreet quis susurrus nunc massa etiam in ante metus.</p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div id="container43" class="style9 container columns">
+						<div class="wrapper">
+							<div class="inner">
+								<div>
+									<div id="image51" class="style6 image">
+										<span class="frame"><img src="assets/images/image51.jpg" alt="" /></span>
+									</div>
+								</div>
+								<div>
+									<p id="text04" class="style13">Name, CEO at <mark>Company</mark></p>
+									<p id="text37" class="style12">Risus letanie feugiat posuere urna tincidunt present. Interdum varius vincit omnia dum spiro melior laoreet quis susurrus nunc massa etiam in ante metus.</p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div id="container11" class="style9 container columns">
+						<div class="wrapper">
+							<div class="inner">
+								<div>
+									<div id="image36" class="style6 image">
+										<span class="frame"><img src="assets/images/image36.jpg" alt="" /></span>
+									</div>
+								</div>
+								<div>
+									<p id="text10" class="style13">Name, CEO at <mark>Company</mark></p>
+									<p id="text50" class="style12">Risus letanie feugiat posuere urna tincidunt present. Interdum varius vincit omnia dum spiro melior laoreet quis susurrus nunc massa etiam in ante metus.</p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div id="container26" class="style9 container columns">
+						<div class="wrapper">
+							<div class="inner">
+								<div>
+									<div id="image52" class="style6 image">
+										<span class="frame"><img src="assets/images/image52.jpg" alt="" /></span>
+									</div>
+								</div>
+								<div>
+									<p id="text51" class="style13">Name, CEO at <mark>Company</mark></p>
+									<p id="text68" class="style12">Risus letanie feugiat posuere urna tincidunt present. Interdum varius vincit omnia dum spiro melior laoreet quis susurrus nunc massa etiam in ante metus.</p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div id="container22" class="style9 container columns">
+						<div class="wrapper">
+							<div class="inner">
+								<div>
+									<div id="image01" class="style6 image">
+										<span class="frame"><img src="assets/images/image01.jpg" alt="" /></span>
+									</div>
+								</div>
+								<div>
+									<p id="text16" class="style13">Name, CEO at <mark>Company</mark></p>
+									<p id="text19" class="style12">Risus letanie feugiat posuere urna tincidunt present. Interdum varius vincit omnia dum spiro melior laoreet quis susurrus nunc massa etiam in ante metus.</p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div id="embed07">
+						</div>
+					</div>
+					<div id="container41" class="container default full screen">
+						<div class="wrapper">
+							<div class="inner">
+								<p id="text107">Trusted by:</p>
+							</div>
+						</div>
+					</div>
+					<div id="container27" class="container default full screen">
+						<div class="wrapper">
+							<div class="inner">
+								<h2 id="text42" class="style1">Let&#039;s do it</h2>
+								<p id="text78" class="style2">A condimentum vitae sapien pellentesque habitant. Proin nunc consequat interdum varius alis propriis volat mattis.</p>
+							</div>
+						</div>
+					</div>
+					<div id="container03" class="style9 container default">
+						<div class="wrapper">
+							<div class="inner">
+							</div>
+						</div>
+					</div>
+					<div id="container34" class="container default full screen">
+						<div class="wrapper">
+							<div class="inner">
+								<p id="text43">© All rights reserved.</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script src="assets/main.js"></script>
+	</body>
+</html>
